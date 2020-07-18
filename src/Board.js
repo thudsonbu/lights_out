@@ -2,33 +2,6 @@ import React, {Component} from "react";
 import Cell from "./Cell";
 import './Board.css';
 
-
-/** Game board of Lights out.
- *
- * Properties:
- *
- * - nrows: number of rows of board
- * - ncols: number of cols of board
- * - chanceLightStartsOn: float, chance any cell is lit at start of game
- *
- * State:
- *
- * - hasWon: boolean, true when board is all off
- * - board: array-of-arrays of true/false
- *
- *    For this board:
- *       .  .  .
- *       O  O  .     (where . is off, and O is on)
- *       .  .  .
- *
- *    This would be: [[f, f, f], [t, t, f], [f, f, f]]
- *
- *  This should render an HTML table of individual <Cell /> components.
- *
- *  This doesn't handle any clicks --- clicks are on individual cells
- *
- **/
-
 class Board extends Component {
 
   static defaultProps = {
@@ -68,9 +41,9 @@ class Board extends Component {
       let subarray = []
       for(let i = 0; i < ncols; i++){
         if (this.randomChance()){
-          subarray.push('t');
+          subarray.push(true);
         } else {
-          subarray.push('f');
+          subarray.push(false);
         }
       }
       array.push(subarray);
@@ -98,12 +71,19 @@ class Board extends Component {
       }
     }
 
+    flipCell(y,x);
+    flipCell(y, x-1);
+    flipCell(y, x+1);
+    flipCell(y-1, x);
+    flipCell(y+1, x);
+
     // TODO: flip this cell and the cells around it
 
     // win when every cell is turned off
     // TODO: determine is the game has been won
+    let hasWon = board.every(row => row.every(cell => !cell));
 
-    this.setState({board});
+    this.setState({board: board, hasWon: hasWon});
   }
 
 
@@ -112,25 +92,43 @@ class Board extends Component {
   render() {
 
     // if the game is won, just show a winning msg & render nothing else
-
-    // TODO
+    if(this.state.hasWon){
+      return (
+        <div className='Board-title'>
+          <div className='winner'>
+            <span className='neon-orange'>You</span>
+            <span className='neon-blue'>Win!</span>
+          </div>
+        </div>
+      );
+    }
 
     // make table board
 
-    // TODO
     let tblBoard = [];
     for(let y = 0; y < this.props.nrows; y++){
       let row = [];
       for(let x = 0; x < this.props.ncols; x++){
-        row.push(<Cell isLit={this.state.board[x][y]} />);
+        let coord = y + "-" + x;
+        row.push(<Cell 
+          key={coord} 
+          isLit={this.state.board[y][x]}
+          flipCellsAroundMe={() => this.flipCellsAround(coord)}
+        />);
       }
-      tblBoard.push(<tr>{row}</tr>);
+      tblBoard.push(<tr key={y}>{row}</tr>);
     }
 
     return (
-      <table className='Board'>
-        <tbody>{tblBoard}</tbody>
-      </table>
+      <div>
+        <div className='Board-title'>
+          <div className='neon-orange'>Lights</div>
+          <div className='neon-blue'> Out </div>
+        </div>
+        <table className='Board'>
+          <tbody>{tblBoard}</tbody>
+        </table>
+      </div>
     );
   }
 }
