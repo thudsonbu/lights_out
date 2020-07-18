@@ -31,18 +31,55 @@ import './Board.css';
 
 class Board extends Component {
 
+  static defaultProps = {
+    nrows: 5,
+    ncols: 5,
+    chanceLightStartsOn: .25
+  };
+
   constructor(props) {
     super(props);
 
-    // TODO: set initial state
+    this.state = {
+      hasWon: false,
+      board: this.createBoard()
+    }
+
+    this.createBoard = this.createBoard.bind(this);
+    this.randomizeBoard = this.setBoard.bind(this);
+    this.randomChance = this.randomChance.bind(this);
   }
 
   /** create a board nrows high/ncols wide, each cell randomly lit or unlit */
 
   createBoard() {
-    let board = [];
-    // TODO: create array-of-arrays of true/false values
+    // Get rows and columns from props
+    let nrows = this.props.nrows;
+    let ncols = this.props.ncols;
+    // Randomly light some parts of the board
+    let board = this.setBoard(nrows, ncols);
     return board
+  }
+
+  // Generates a random board nested array
+  setBoard( nrows, ncols) {
+    let array = []
+    for(let i = 0; i < nrows; i++){
+      let subarray = []
+      for(let i = 0; i < ncols; i++){
+        if (this.randomChance()){
+          subarray.push('t');
+        } else {
+          subarray.push('f');
+        }
+      }
+      array.push(subarray);
+    }
+    return array;
+  }
+
+  randomChance(){
+    return Math.random() < this.props.chanceLightStartsOn;
   }
 
   /** handle changing a cell: update board & determine if winner */
@@ -66,7 +103,7 @@ class Board extends Component {
     // win when every cell is turned off
     // TODO: determine is the game has been won
 
-    this.setState({board, hasWon});
+    this.setState({board});
   }
 
 
@@ -81,6 +118,20 @@ class Board extends Component {
     // make table board
 
     // TODO
+    let tblBoard = [];
+    for(let y = 0; y < this.props.nrows; y++){
+      let row = [];
+      for(let x = 0; x < this.props.ncols; x++){
+        row.push(<Cell isLit={this.state.board[x][y]} />);
+      }
+      tblBoard.push(<tr>{row}</tr>);
+    }
+
+    return (
+      <table className='Board'>
+        <tbody>{tblBoard}</tbody>
+      </table>
+    );
   }
 }
 
